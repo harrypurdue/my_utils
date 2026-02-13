@@ -5,7 +5,7 @@ import ipaddress
 import csv
 import re
 from itertools import product
-from typing import Iterable, Optional, Callable, Dict
+from typing import Iterable, Optional, Callable, Dict, Generator
 
 def ip_in_range(ip: ipaddress.IPv4Address | ipaddress.IPv6Address | str, 
                 range: ipaddress.IPv4Network | ipaddress.IPv6Network | str) -> bool | None:
@@ -132,7 +132,7 @@ def get_input(name: str, return_iterable: Iterable = False, prompt: Optional[str
 
     return return_dict
 
-def expand_tn(tn):
+def expand_tn(tn: str) -> Generator:
     """
     Expands a telephone number pattern from Cisco Call Manager and returns a generator of all possible numbers.
 
