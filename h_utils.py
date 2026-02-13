@@ -3,6 +3,8 @@ contains code that make my life a bit easier
 """
 import ipaddress
 import csv
+import re
+from itertools import product
 from typing import Iterable, Optional, Callable, Dict
 
 def ip_in_range(ip: ipaddress.IPv4Address | ipaddress.IPv6Address | str, 
@@ -129,6 +131,47 @@ def get_input(name: str, return_iterable: Iterable = False, prompt: Optional[str
     return_dict.update({name : temp})
 
     return return_dict
+
+def expand_tn(tn):
+    """
+    Expands a telephone number pattern from Cisco Call Manager and returns a generator of all possible numbers.
+
+    Example Patterns
+    1316555101[0-9]
+    131655510XX
+    131655511[0-2]X
+    1316555111X[4-8]
+
+    1316555101[0-9] will return a generator containing
+    13165551010, 13165551011, 13165551012, 13165551013, ... 13165551019
+
+    :param tn: telephone number pattern to expand
+    :type tn: str
+
+    :return generator
+    """
+    FULL_NUMBER_RE = r"\[([0-9])-([0-9])\]|(X)|([0-9])"
+    ranges = []
+    for match in re.finditer(FULL_NUMBER_RE, tn):
+        match_groups = match.groups()
+        m = [m for m in match_groups if m is not None]
+        if len(m) == 1:
+            if m[0] == "X":
+                start = 0
+                stop = 10
+            else:
+                start = int(m[0])
+                stop = start + 1
+        else:
+            start = int(m[0])
+            stop = int(m[1]) + 1
+        ranges.append(list(range(start, stop)))
+
+    for x in product(*ranges):
+        single_expanded_number = ""
+        for xx in x:
+            single_expanded_number += f"{xx}"
+        yield single_expanded_number
 
 if __name__ == "__main__":
     pass
